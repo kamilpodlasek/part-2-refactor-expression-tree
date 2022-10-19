@@ -1,44 +1,101 @@
 import { strictEqual } from "assert";
 
-const Node = (operator: any, value: any, left: any, right: any) => {
-  const result = function () {
-    switch (operator) {
-      case "+":
-        return left.result() + right.result();
-      case "-":
-        return left.result() - right.result();
-      case "x":
-        return left.result() * right.result();
-      case "÷":
-        return left.result() / right.result();
-      default:
-        return value;
-    }
-  };
+class Operator {
+  left: INode;
+  right: INode;
 
-  const toString = function () {
-    switch (operator) {
-      case "+":
-        return `(${left.toString()} + ${right.toString()})`;
-      case "-":
-        return `(${left.toString()} - ${right.toString()})`;
-      case "x":
-        return `(${left.toString()} x ${right.toString()})`;
-      case "÷":
-        return `(${left.toString()} ÷ ${right.toString()})`;
-      default:
-        return value.toString();
-    }
-  };
+  constructor(left: INode, right: INode) {
+    this.left = left;
+    this.right = right;
+  }
 
-  return {
-    operator,
-    value,
-    left,
-    right,
-    result,
-    toString,
-  };
+  result() {
+    throw Error("Calling result on an unspecified operator!");
+  }
+
+  toString() {
+    throw Error("Calling toString on an unspecified operator!");
+  }
+}
+
+class Add extends Operator {
+  result() {
+    return this.left.result() + this.right.result();
+  }
+
+  toString() {
+    return `(${this.left.toString()} + ${this.right.toString()})`;
+  }
+}
+
+class Subtract extends Operator {
+  result() {
+    return this.left.result() - this.right.result();
+  }
+
+  toString() {
+    return `(${this.left.toString()} - ${this.right.toString()})`;
+  }
+}
+
+class Multiply extends Operator {
+  result() {
+    return this.left.result() * this.right.result();
+  }
+
+  toString() {
+    return `(${this.left.toString()} x ${this.right.toString()})`;
+  }
+}
+
+class Divide extends Operator {
+  result() {
+    return this.left.result() / this.right.result();
+  }
+
+  toString() {
+    return `(${this.left.toString()} ÷ ${this.right.toString()})`;
+  }
+}
+
+const operators = {
+  "+": Add,
+  "-": Subtract,
+  x: Multiply,
+  "÷": Divide,
+};
+
+interface INode {
+  result: () => number;
+  toString: () => string;
+}
+
+const Node = (
+  operator: string,
+  value: number | null,
+  left: INode | null,
+  right: INode | null
+): INode => {
+  if (value) {
+    return {
+      result: () => value,
+      toString: () => value.toString(),
+    };
+  }
+
+  if (!left) {
+    throw Error("Left side of the operator not provided!");
+  }
+
+  if (!right) {
+    throw Error("Right side of the operator not provided!");
+  }
+
+  if (!operators[operator]) {
+    throw Error("Operator not found!");
+  }
+
+  return new operators[operator](left, right);
 };
 
 const tree = Node(
