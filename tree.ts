@@ -70,7 +70,7 @@ interface INode {
   toString: () => string;
 }
 
-const Node = (
+export const Node = (
   operator: string,
   value: number | null,
   left: INode | null,
